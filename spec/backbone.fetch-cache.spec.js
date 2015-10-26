@@ -542,6 +542,19 @@ describe('Backbone.fetchCache', function() {
         expect(promise).toBeUnresolved();
       });
 
+      it('should be able to halt the request before it completes', function() {
+        var fail = jasmine.createSpy('fail');
+        var promise = model.fetch().fail(fail);
+
+        waitsFor(promiseComplete(promise));
+        promise.abort();
+
+        runs(function() {
+          expect(fail).toHaveBeenCalled();
+          expect(fail.calls[0].args[2]).toBe('abort');
+        });
+      });
+
       describe('on AJAX error', function() {
 
         it('rejects the promise', function() {
@@ -1210,6 +1223,19 @@ describe('Backbone.fetchCache', function() {
 
         runs(function() {
           expect(collection.toJSON()).toEqual(cacheData);
+        });
+      });
+
+      it('should be able to halt the request before it completes', function() {
+        var fail = jasmine.createSpy('fail');
+        var promise = collection.fetch().fail(fail);
+
+        waitsFor(promiseComplete(promise));
+        promise.abort();
+
+        runs(function() {
+          expect(fail).toHaveBeenCalled();
+          expect(fail.calls[0].args[2]).toBe('abort');
         });
       });
 
