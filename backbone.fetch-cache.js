@@ -186,6 +186,18 @@
     return window.setTimeout(fn, 0);
   }
 
+  // returns a promise which provides the same methods as a jqXHR object
+  function getPromise(deferred, jqXHR) {
+    var promise = deferred.promise();
+
+    promise.success = promise.done;
+    promise.error = promise.fail;
+    promise.complete = promise.always;
+    promise.abort = (jqXHR ? jqXHR.abort : $.noop);
+
+    return promise;
+  }
+
   // Instance methods
   Backbone.Model.prototype.fetch = function(opts) {
     //Bypass caching if it's not enabled
@@ -246,7 +258,7 @@
       }
 
       if (!isPrefilling()) {
-        return deferred.promise();
+        return getPromise(deferred);
       }
     }
 
@@ -259,10 +271,7 @@
       // Reject the promise on fail
       .fail( _.bind(deferred.reject, context, this) );
 
-    deferred.abort = jqXHR.abort;
-
-    // return a promise which provides the same methods as a jqXHR object
-    return deferred.promise();
+    return getPromise(deferred, jqXHR);
   };
 
   // Override Model.prototype.sync and try to clear cache items if it looks
@@ -348,7 +357,7 @@
       }
 
       if (!isPrefilling()) {
-        return deferred.promise();
+        return getPromise(deferred);
       }
     }
 
@@ -361,10 +370,7 @@
       // Reject the promise on fail
       .fail( _.bind(deferred.reject, context, this) );
 
-    deferred.abort = jqXHR.abort;
-
-    // return a promise which provides the same methods as a jqXHR object
-    return deferred.promise();
+    return getPromise(deferred, jqXHR);
   };
 
   // Prime the cache from localStorage on initialization
