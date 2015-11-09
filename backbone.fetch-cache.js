@@ -235,7 +235,7 @@
       // ...finish and return if we're not
       else {
         if (_.isFunction(opts.success)) { opts.success.call(context, self, attributes, opts); }
-        deferred.resolveWith(context, [self]);
+        deferred.resolveWith(context, [attributes, 'cachesuccess']);
       }
     }
 
@@ -264,12 +264,18 @@
 
     // Delegate to the actual fetch method and store the attributes in the cache
     var jqXHR = superMethods.modelFetch.apply(this, arguments);
-    // resolve the returned promise when the AJAX call completes
-    jqXHR.done( _.bind(deferred.resolve, context, this) )
-      // Set the new data in the cache
-      .done( _.bind(Backbone.fetchCache.setCache, null, this, opts) )
-      // Reject the promise on fail
-      .fail( _.bind(deferred.reject, context, this) );
+
+    jqXHR
+      .done(function(attrs) {
+        // resolve the returned promise when the AJAX call completes
+        deferred.resolveWith(context, arguments);
+        // Set the new data in the cache
+        Backbone.fetchCache.setCache(self, opts, attrs);
+      })
+      .fail(function() {
+        // Reject the promise on fail
+        deferred.rejectWith(context, arguments);
+      });
 
     return getPromise(deferred, jqXHR);
   };
@@ -334,7 +340,7 @@
       // ...finish and return if we're not
       else {
         if (_.isFunction(opts.success)) { opts.success.call(context, self, attributes, opts); }
-        deferred.resolveWith(context, [self]);
+        deferred.resolveWith(context, [attributes, 'cachesuccess']);
       }
     }
 
@@ -363,12 +369,18 @@
 
     // Delegate to the actual fetch method and store the attributes in the cache
     var jqXHR = superMethods.collectionFetch.apply(this, arguments);
-    // resolve the returned promise when the AJAX call completes
-    jqXHR.done( _.bind(deferred.resolve, context, this) )
-      // Set the new data in the cache
-      .done( _.bind(Backbone.fetchCache.setCache, null, this, opts) )
-      // Reject the promise on fail
-      .fail( _.bind(deferred.reject, context, this) );
+
+    jqXHR
+      .done(function(attrs) {
+        // resolve the returned promise when the AJAX call completes
+        deferred.resolveWith(context, arguments);
+        // Set the new data in the cache
+        Backbone.fetchCache.setCache(self, opts, attrs);
+      })
+      .fail(function() {
+        // Reject the promise on fail
+        deferred.rejectWith(context, arguments);
+      });
 
     return getPromise(deferred, jqXHR);
   };

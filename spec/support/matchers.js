@@ -50,6 +50,9 @@
       },
       toBeUnresolved: function(expected) {
         return this.actual.state() === 'pending';
+      },
+      toBeRejected: function(expected) {
+        return this.actual.state() === 'rejected';
       }
     });
   });

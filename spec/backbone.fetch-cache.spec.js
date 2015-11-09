@@ -565,7 +565,21 @@ describe('Backbone.fetchCache', function() {
 
           runs(function() {
             expect(Backbone.fetchCache._cache[errorModel.url]).toBeUndefined();
-            expect(promise.state()).toBe('rejected');
+            expect(promise).toBeRejected();
+          });
+        });
+
+        it('fullfils the promise with correct arguments', function() {
+          var fail = jasmine.createSpy('fail');
+          var promise = errorModel.fetch().fail(fail);
+
+          waitsFor(promiseComplete(promise));
+          server.respond();
+
+          runs(function() {
+            expect(fail.calls[0].args[0]).toBeAPromise();
+            expect(fail.calls[0].args[1]).toBe('error');
+            expect(fail.calls[0].args[2]).toBe('Internal Server Error');
           });
         });
 
@@ -610,11 +624,13 @@ describe('Backbone.fetchCache', function() {
           });
         });
 
-        it('resolves the promise with the model instance', function() {
+        it('resolves the promise with the correct arguments', function() {
           promise.done(successSpy);
           waitsFor(promiseComplete(promise));
           runs(function() {
-            expect(successSpy).toHaveBeenCalledWith(model);
+            expect(successSpy).toHaveBeenCalled();
+            expect(successSpy.calls[0].args[0]).toBe(cacheData);
+            expect(successSpy.calls[0].args[1]).toBe('cachesuccess');
           });
         });
 
@@ -737,8 +753,9 @@ describe('Backbone.fetchCache', function() {
 
           server.respond();
 
-          expect(success.calls[0].args[0]).toEqual(model);
-          expect(success.calls[0].args[1]).toEqual(modelResponse);
+          expect(success.calls[0].args[0]).toEqual(modelResponse);
+          expect(success.calls[0].args[1]).toEqual('success');
+          expect(success.calls[0].args[2]).toBeAPromise();
         });
       });
 
@@ -1249,7 +1266,21 @@ describe('Backbone.fetchCache', function() {
 
           runs(function() {
             expect(Backbone.fetchCache._cache[errorCollection.url]).toBeUndefined();
-            expect(promise.state()).toBe('rejected');
+            expect(promise).toBeRejected();
+          });
+        });
+
+        it('fullfils the promise with correct arguments', function() {
+          var fail = jasmine.createSpy('fail');
+          var promise = errorCollection.fetch().fail(fail);
+
+          waitsFor(promiseComplete(promise));
+          server.respond();
+
+          runs(function() {
+            expect(fail.calls[0].args[0]).toBeAPromise();
+            expect(fail.calls[0].args[1]).toBe('error');
+            expect(fail.calls[0].args[2]).toBe('Internal Server Error');
           });
         });
 
@@ -1304,13 +1335,14 @@ describe('Backbone.fetchCache', function() {
           });
         });
 
-        it('fulfills the promise with the collection instance', function() {
-          var spy = jasmine.createSpy('success');
-          var promise = collection.fetch({ cache: true }).done(spy);
+        it('fulfills the promise with correct arguments', function() {
+          var success = jasmine.createSpy('success');
+          var promise = collection.fetch({ cache: true }).done(success);
 
           waitsFor(promiseComplete(promise));
           runs(function() {
-            expect(spy).toHaveBeenCalledWith(collection);
+            expect(success.calls[0].args[0]).toBe(cacheData);
+            expect(success.calls[0].args[1]).toBe('cachesuccess');
           });
         });
 
@@ -1420,8 +1452,9 @@ describe('Backbone.fetchCache', function() {
           collection.fetch({ prefill: true }).done(success);
           server.respond();
 
-          expect(success.calls[0].args[0]).toEqual(collection);
-          expect(success.calls[0].args[1]).toEqual(collectionResponse);
+          expect(success.calls[0].args[0]).toEqual(collectionResponse);
+          expect(success.calls[0].args[1]).toEqual('success');
+          expect(success.calls[0].args[2]).toBeAPromise();
         });
       });
 
